@@ -1,0 +1,25 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: pushprox-etcd
+  namespace: monitoring
+spec:
+  chart: https://charts.rancher.io/assets/rancher-pushprox/rancher-pushprox-0.1.201.tgz
+  valuesContent: |-
+    metricsPort: 2381
+    component: k3s-etcd
+    serviceMonitor:
+      enabled: true
+    proxy:
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: "true"
+    clients:
+      port: 10014
+      useLocalhost: true
+      tolerations:
+      - effect: "NoExecute"
+        operator: "Exists"
+      - effect: "NoSchedule"
+        operator: "Exists"
+      nodeSelector:
+        "node-role.kubernetes.io/etcd": "true"

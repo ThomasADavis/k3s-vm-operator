@@ -1,0 +1,129 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMCluster
+metadata:
+  name: home
+  namespace: monitoring
+spec:
+  # Add fields here
+  retentionPeriod: "6"
+  vmstorage:
+    replicaCount: 3
+    image:
+      repository: victoriametrics/vmstorage
+      tag: v1.59.0-cluster
+      pullPolicy: Always
+    storageDataPath: "/vm-data"
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          resources:
+            requests:
+              storage: 1500Gi
+    resources:
+      limits:
+        cpu: "1"
+        memory: "2Gi"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: node-role.kubernetes.io/master
+              operator: In
+              values:
+              - "true"
+  vmselect:
+    replicaCount: 3
+    image:
+      repository: victoriametrics/vmselect
+      tag: v1.59.0-cluster
+      pullPolicy: Always
+    cacheMountPath: "/select-cache"
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          resources:
+            requests:
+              storage: 2Gi
+    resources:
+      limits:
+        cpu: "1"
+        memory: "2Gi"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: node-role.kubernetes.io/master
+              operator: In
+              values:
+              - "true"
+  vminsert:
+    image:
+      repository: victoriametrics/vminsert
+      tag: v1.59.0-cluster
+      pullPolicy: Always
+    replicaCount: 3
+    resources:
+      limits:
+        cpu: "1"
+        memory: "1Gi"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: node-role.kubernetes.io/master
+              operator: In
+              values:
+              - "true"
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: home-vmetric
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: home-vmetric.192-168-1-242.nip.io
+    http:
+      paths:
+      - path: /insert/
+        pathType: Prefix
+        backend:
+          service:
+            name: vminsert-home
+            port:
+              number: 8480
+      - path: /select/
+        pathType: Prefix
+        backend:
+          service:
+            name: vmselect-home
+            port:
+              number: 8481
+      - path: /storage/
+        pathType: Prefix
+        backend:
+          service:
+            name: vmstorage-home
+            port:
+              number: 8482
+      - path: /vmagent/
+        pathType: Prefix
+        backend:
+          service:
+            name: vmagent-home
+            port:
+              number: 8429
+      - path: /vmalert/
+        pathType: Prefix
+        backend:
+          service:
+            name: vmalert-home
+            port:
+              number: 8429
+

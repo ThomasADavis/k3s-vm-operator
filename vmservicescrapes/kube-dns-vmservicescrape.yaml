@@ -1,0 +1,13 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: kube-dns-scrape
+  namespace: kube-system
+spec:
+  endpoints:
+    - port: metrics
+      path: /metrics
+  namespaceSelector: {}
+  selector:
+    matchLabels:
+      k8s-app: kube-dns

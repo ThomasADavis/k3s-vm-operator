@@ -1,0 +1,19 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: kubernetes-system-scheduler-alert
+  namespace: monitoring
+spec:
+  groups:
+  - "name": "kubernetes-system-scheduler"
+    "rules":
+    - "alert": "KubeSchedulerDown"
+      "annotations":
+        "description": "KubeScheduler has disappeared from Prometheus target discovery."
+        "runbook_url": "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeschedulerdown"
+        "summary": "Target disappeared from Prometheus target discovery."
+      "expr": |
+        absent(up{job="k3s-server"} == 1)
+      "for": "15m"
+      "labels":
+        "severity": "critical"

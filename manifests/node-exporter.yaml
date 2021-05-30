@@ -1,0 +1,13 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: node-exporter
+  namespace: monitoring
+spec:
+  chart: https://github.com/prometheus-community/helm-charts/releases/download/prometheus-node-exporter-1.18.0/prometheus-node-exporter-1.18.0.tgz
+  valuesContent: |-
+    fullnameOverride: 'node-exporter'
+    image:
+      repository: quay.io/prometheus/node-exporter
+      tag: v1.1.2
+      pullPolicy: IfNotPresent

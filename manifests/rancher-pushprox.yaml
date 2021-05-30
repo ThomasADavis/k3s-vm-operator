@@ -1,0 +1,24 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: pushprox
+  namespace: monitoring
+spec:
+  chart: https://charts.rancher.io/assets/rancher-pushprox/rancher-pushprox-0.1.201.tgz
+  valuesContent: |-
+    metricsPort: 10249
+    component: k3s-server
+    serviceMonitor:
+      enabled: true
+    clients:
+      port: 10013
+      useLocalhost: true
+      tolerations:
+      - effect: "NoExecute"
+        operator: "Exists"
+      - effect: "NoSchedule"
+        operator: "Exists"
+    proxy:
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: "true"
+

@@ -1,0 +1,44 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAlert
+metadata:
+  name: home
+  namespace: monitoring
+spec:
+  datasource:
+    url: http://vmselect-home.monitoring.svc.cluster.local:8481/select/100/prometheus/
+  evaluationInterval: 30s
+  externalLabels:
+    cluster: home
+  image: {}
+  notifiers:
+  - url: http://vmalertmanager-alertmanager.monitoring.svc:9093
+  remoteRead:
+    url: http://vmselect-home.monitoring.svc.cluster.local:8481/select/100/prometheus/
+  remoteWrite:
+    concurrency: 12
+    url: http://vminsert-home.monitoring.svc.cluster.local:8480/insert/100/prometheus/
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 350m
+      memory: 450Mi
+    requests:
+      cpu: 150m
+      memory: 350Mi
+  ruleSelector: {}
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vmalert
+  namespace: monitoring
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`vmalert-192-168-1-242.nip.io`)
+      kind: Rule
+      services:
+        - name: vmalert-home
+          port: 8080
+
