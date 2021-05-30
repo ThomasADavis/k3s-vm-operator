@@ -4,7 +4,7 @@ metadata:
   name: vm-operator
   namespace: monitoring
 spec:
-  chart: https://victoriametrics.github.io/helm-charts/packages/victoria-metrics-operator-0.1.12.tgz
+  chart: https://victoriametrics.github.io/helm-charts/packages/victoria-metrics-operator-0.1.13.tgz
   valuesContent: |-
     nodeSelector:
       node-role.kubernetes.io/control-plane: "true"
